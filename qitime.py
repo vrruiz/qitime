@@ -167,21 +167,19 @@ def quality_time(
                 )))
                 if times[always_t]:
                     print("🌞", end='')
-                elif times[never_t] == False \
-                    and current_date > times[dawn_t] \
-                    and current_date < times[dusk_t]:
+                elif not times[never_t] \
+                    and times[dawn_t] < current_date < times[dusk_t]:
                     print("🌞", end='')
-                else:
-                    if moon_display == True:
-                        observer.horizon = "0"
-                        observer.date = current_date
-                        moon.compute(observer)
-                        if moon.alt > 0:
-                            print(phase, end='')
-                        else:
-                            print("🌌", end='')
+                elif moon_display:
+                    observer.horizon = "0"
+                    observer.date = current_date
+                    moon.compute(observer)
+                    if moon.alt > 0:
+                        print(phase, end='')
                     else:
                         print("🌌", end='')
+                else:
+                    print("🌌", end='')
         print(" {}".format(phase))
 
 
