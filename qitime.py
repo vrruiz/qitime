@@ -156,7 +156,7 @@ def quality_time(
             phase = "🌗"
         elif lunation <= 93.75:
             phase = "🌘"
-        for h in range(0,24):
+        for h in range(24):
             for m in [0, 30]:
                 current_date = ephem.localtime(ephem.Date("{}-{}-{} {:02d}:{:02d}:00".format(
                     dt.year,
