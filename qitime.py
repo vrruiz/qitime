@@ -32,6 +32,23 @@ def get_lunar_phase(lunation):
     return phase
 
 
+def get_total_dark_hours(dusk, dawn):
+    midnight_prev = datetime.datetime(
+        dusk.year,
+        dusk.month,
+        dusk.day,
+        23, 59, 59
+    )
+    midnight_next = datetime.datetime(
+        dawn.year,
+        dawn.month,
+        dawn.day
+    )
+    prev_hours = midnight_prev - dusk
+    next_hours = dawn - midnight_next
+    return prev_hours + next_hours
+
+
 def quality_time(
     date_time,
     latitude,
@@ -153,6 +170,8 @@ def quality_time(
                 times[dusk_t],
                 times[dawn_t]
             ))
+            total_dark_hours = get_total_dark_hours(times[dusk_t], times[dawn_t])
+            print("  Total dark hours: {}".format(total_dark_hours))
         dt = observer.date.datetime()
         if debug:
             print("  ", end='')
