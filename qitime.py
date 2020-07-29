@@ -11,6 +11,44 @@ import argparse
 import datetime
 import ephem
 
+
+def get_lunar_phase(lunation):
+    if lunation < 6.25 or lunation > 93.75:
+        phase = "🌑"
+    elif lunation < 18.75:
+        phase = "🌒"
+    elif lunation < 31.25:
+        phase = "🌓"
+    elif lunation < 43.75:
+        phase = "🌔"
+    elif lunation < 56.25:
+        phase = "🌕"
+    elif lunation < 68.75:
+        phase = "🌖"
+    elif lunation < 81.25:
+        phase = "🌗"
+    elif lunation <= 93.75:
+        phase = "🌘"
+    return phase
+
+
+def get_total_dark_hours(dusk, dawn):
+    midnight_prev = datetime.datetime(
+        dusk.year,
+        dusk.month,
+        dusk.day,
+        23, 59, 59
+    )
+    midnight_next = datetime.datetime(
+        dawn.year,
+        dawn.month,
+        dawn.day
+    )
+    prev_hours = midnight_prev - dusk
+    next_hours = dawn - midnight_next
+    return prev_hours + next_hours
+
+
 def quality_time(
     date_time,
     latitude,
@@ -132,6 +170,8 @@ def quality_time(
                 times[dusk_t],
                 times[dawn_t]
             ))
+            total_dark_hours = get_total_dark_hours(times[dusk_t], times[dawn_t])
+            print("  Total dark hours: {}".format(total_dark_hours))
         dt = observer.date.datetime()
         if debug:
             print("  ", end='')
@@ -139,24 +179,11 @@ def quality_time(
                     print("{:02}  ".format(i), end='')
             print(" Moon phase")
         print("  ", end='')
-        phase = ""
-        if lunation < 6.25 or lunation > 93.75:
-            phase = "🌑"
-        elif lunation < 18.75:
-            phase = "🌒"
-        elif lunation < 31.25:
-            phase = "🌓"
-        elif lunation < 43.75:
-            phase = "🌔"
-        elif lunation < 56.25:
-            phase = "🌕"
-        elif lunation < 68.75:
-            phase = "🌖"
-        elif lunation < 81.25:
-            phase = "🌗"
-        elif lunation <= 93.75:
-            phase = "🌘"
-        for h in range(24):
+
+        # Get lunar phase
+        phase = get_lunar_phase(lunation)
+
+        for h in range(0,24):
             for m in [0, 30]:
                 current_date = ephem.localtime(ephem.Date("{}-{}-{} {:02d}:{:02d}:00".format(
                     dt.year,
