@@ -1,14 +1,16 @@
 #!/usr/bin/python3
-##
-## qitime - Quality Imaging Time
-## (C) 2020 Victor R. Ruiz <rvr@linotipo.es>
-##
-## Calculates the Quality Imaging Time (dark hours) for a given date.
-## Based on a concept developed by Charles Bracken:
-## https://digitalstars.wordpress.com/
-##
+"""
+qitime - Quality Imaging Time
+(C) 2020 Victor R. Ruiz <rvr@linotipo.es>
+
+Calculates the Quality Imaging Time (dark hours) for a given date.
+Based on a concept developed by Charles Bracken:
+https://digitalstars.wordpress.com/
+"""
+
 import argparse
 import datetime
+
 import ephem
 
 
@@ -33,17 +35,8 @@ def get_lunar_phase(lunation):
 
 
 def get_total_dark_hours(dusk, dawn):
-    midnight_prev = datetime.datetime(
-        dusk.year,
-        dusk.month,
-        dusk.day,
-        23, 59, 59
-    )
-    midnight_next = datetime.datetime(
-        dawn.year,
-        dawn.month,
-        dawn.day
-    )
+    midnight_prev = datetime.datetime(dusk.year, dusk.month, dusk.day, 23, 59, 59)
+    midnight_next = datetime.datetime(dawn.year, dawn.month, dawn.day)
     prev_hours = midnight_prev - dusk
     next_hours = dawn - midnight_next
     return prev_hours + next_hours
@@ -55,86 +48,97 @@ def quality_time(
     longitude,
     moon_display=False,
     debug=False,
-    header=False,
-    ):
+):
     """ Calculate quality time. """
-    ## Observer data
+    # Observer data
     observer = ephem.Observer()
     observer.lon = latitude
     observer.lat = longitude
     observer.elevation = 0
-    observer.pressure = 1013 # USNO
+    observer.pressure = 1013  # USNO
     observer.temp = 10
-    observer.horizon = '-0:34' # USNO
-    observer.date = date_time # Local time
+    observer.horizon = "-0:34"  # USNO
+    observer.date = date_time  # Local time
 
     if debug:
         print("= Observer")
-        print("  Date:{}\tLon:{}\tLat:{}".format(
-            observer.date,
-            observer.lon,
-            observer.lat
-        ))
+        print(
+            "  Date:{}\tLon:{}\tLat:{}".format(
+                observer.date, observer.lon, observer.lat
+            )
+        )
 
-    ## Objects
+    # Objects
     sun = ephem.Sun()
     moon = ephem.Moon()
-    # Compute 
+    # Compute
     sun.compute(observer)
     moon.compute(observer)
     # Calculate moon phase
     next_new_moon = ephem.next_new_moon(observer.date)
     prev_new_moon = ephem.previous_new_moon(observer.date)
     # 50 = full moon, 0 = new moon
-    lunation = (observer.date - prev_new_moon) / (next_new_moon - prev_new_moon) * 100
+    lunation = (
+        float(observer.date - prev_new_moon) / (next_new_moon - prev_new_moon) * 100
+    )
 
-    objects = { 'Sun': sun, 'Moon': moon }
+    objects = {"Sun": sun, "Moon": moon}
     times = {}
 
-    if debug: print("= Rise/Transit/Set")
+    if debug:
+        print("= Rise/Transit/Set")
     for target in objects:
         t = objects[target]
         times[target] = {
-            'rise' : None,
-            'transit' : None,
-            'set' : None,
-            'always_up': False,
-            'never_up': False,
+            "rise": None,
+            "transit": None,
+            "set": None,
+            "always_up": False,
+            "never_up": False,
         }
         try:
-            times[target]['rise'] = ephem.localtime(observer.next_rising(t, use_center=True))
-            times[target]['transit'] = ephem.localtime(observer.next_transit(t))
-            times[target]['set'] = ephem.localtime(observer.next_setting(t, use_center=True))
+            times[target]["rise"] = ephem.localtime(
+                observer.next_rising(t, use_center=True)
+            )
+            times[target]["transit"] = ephem.localtime(observer.next_transit(t))
+            times[target]["set"] = ephem.localtime(
+                observer.next_setting(t, use_center=True)
+            )
             if debug:
-                print("  {}\tRise:{}\tTransit:{}\tSet:{}".format(
-                    target,
-                    times[target]['rise'],
-                    times[target]['transit'],
-                    times[target]['set']
-                ))
+                print(
+                    "  {}\tRise:{}\tTransit:{}\tSet:{}".format(
+                        target,
+                        times[target]["rise"],
+                        times[target]["transit"],
+                        times[target]["set"],
+                    )
+                )
         except ephem.AlwaysUpError:
-            if debug: print("  {} always up".format(target))
-            times[target]['always_up'] = True
+            if debug:
+                print(f"  {target} always up")
+            times[target]["always_up"] = True
         except ephem.NeverUpError:
-            if debug: print("  {} never up".format(target))
-            times[target]['never_up'] = True
+            if debug:
+                print(f"  {target} never up")
+            times[target]["never_up"] = True
 
-    ## Twilight
+    # Twilight
     # https://stackoverflow.com/questions/2637293/calculating-dawn-and-sunset-times-using-pyephem
     # fred.horizon = '-6' #-6=civil twilight, -12=nautical, -18=astronomical
-    if debug: print("= Twilight")
+    if debug:
+        print("= Twilight")
     twilight = {
-        #'Civil': '-6',
-        #'Nautical': '-12',
-        'Quality': '-15',
-        #'Astronomical': '-18'
-        }
+        # 'Civil': '-6',
+        # 'Nautical': '-12',
+        "Quality": "-15",
+        # 'Astronomical': '-18'
+    }
     for twilight_type in twilight:
         observer.horizon = twilight[twilight_type]
-        dawn_t = "{}_dawn".format(twilight_type)
-        dusk_t = "{}_dusk".format(twilight_type)
-        always_t = "{}_always".format(twilight_type)
-        never_t = "{}_never".format(twilight_type)
+        dawn_t = f"{twilight_type}_dawn"
+        dusk_t = f"{twilight_type}_dusk"
+        always_t = f"{twilight_type}_always"
+        never_t = f"{twilight_type}_never"
         times[dawn_t] = None
         times[dusk_t] = None
         times[always_t] = False
@@ -144,73 +148,77 @@ def quality_time(
             times[dusk_t] = ephem.localtime(observer.next_setting(sun, use_center=True))
             times[dawn_t] = ephem.localtime(observer.next_rising(sun, use_center=True))
             if debug:
-                print("  {}\tDawn:{}\tDusk:{}".format(
-                    twilight_type,
-                    times[dusk_t],
-                    times[dawn_t]
-                ))
+                print(
+                    "  {}\tDawn:{}\tDusk:{}".format(
+                        twilight_type, times[dusk_t], times[dawn_t]
+                    )
+                )
         except ephem.AlwaysUpError:
             times[always_t] = True
-            if debug: print("  There is not {} night".format(twilight_type))
+            if debug:
+                print(f"  There is not {twilight_type} night")
         except ephem.NeverUpError:
             times[never_t] = True
-            if debug: print("  There is not {} night".format(twilight_type))
+            if debug:
+                print(f"  There is not {twilight_type} night")
 
-    ## Dark Night
-    if debug: print("= Dark night (without any Moon)")
-        # Calculate limits
+    # Dark Night
+    if debug:
+        print("= Dark night (without any Moon)")
+    # Calculate limits
     for twilight_type in twilight:
-        dawn_t = "{}_dawn".format(twilight_type)
-        dusk_t = "{}_dusk".format(twilight_type)
-        always_t = "{}_always".format(twilight_type)
-        never_t = "{}_never".format(twilight_type)
+        dawn_t = f"{twilight_type}_dawn"
+        dusk_t = f"{twilight_type}_dusk"
+        always_t = f"{twilight_type}_always"
+        never_t = f"{twilight_type}_never"
         if debug:
-            print("  Darkness ({})\tStart:{}\tEnd:{}".format(
-                twilight_type,
-                times[dusk_t],
-                times[dawn_t]
-            ))
+            print(
+                "  Darkness ({})\tStart:{}\tEnd:{}".format(
+                    twilight_type, times[dusk_t], times[dawn_t]
+                )
+            )
             total_dark_hours = get_total_dark_hours(times[dusk_t], times[dawn_t])
-            print("  Total dark hours: {}".format(total_dark_hours))
+            print(f"  Total dark hours: {total_dark_hours}")
         dt = observer.date.datetime()
         if debug:
-            print("  ", end='')
-            for i in range(0,24):
-                    print("{:02}  ".format(i), end='')
+            print("  ", end="")
+            for i in range(0, 24):
+                print(f"{i:02}  ", end="")
             print(" Moon phase")
-        print("  ", end='')
+        print("  ", end="")
 
         # Get lunar phase
         phase = get_lunar_phase(lunation)
 
-        for h in range(0,24):
+        for h in range(0, 24):
             for m in [0, 30]:
-                current_date = ephem.localtime(ephem.Date("{}-{}-{} {:02d}:{:02d}:00".format(
-                    dt.year,
-                    dt.month,
-                    dt.day,
-                    h,
-                    m
-                )))
+                current_date = ephem.localtime(
+                    ephem.Date(
+                        "{}-{}-{} {:02d}:{:02d}:00".format(
+                            dt.year, dt.month, dt.day, h, m
+                        )
+                    )
+                )
                 if times[always_t]:
-                    print("🌞", end='')
-                elif not times[never_t] \
-                    and times[dawn_t] < current_date < times[dusk_t]:
-                    print("🌞", end='')
+                    print("🌞", end="")
+                elif (
+                    not times[never_t] and times[dawn_t] < current_date < times[dusk_t]
+                ):
+                    print("🌞", end="")
                 elif moon_display:
                     observer.horizon = "0"
                     observer.date = current_date
                     moon.compute(observer)
                     if moon.alt > 0:
-                        print(phase, end='')
+                        print(phase, end="")
                     else:
-                        print("🌌", end='')
+                        print("🌌", end="")
                 else:
-                    print("🌌", end='')
-        print(" {}".format(phase))
+                    print("🌌", end="")
+        print(f" {phase}")
 
 
-if (__name__ == '__main__'):
+if __name__ == "__main__":
     # Parse arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--lat", help="Observer latitude", required=True)
@@ -227,26 +235,4 @@ if (__name__ == '__main__'):
         longitude=args.lon,
         debug=True,
         moon_display=True,
-        header=True,
     )
-    # TODO: Calendar
-    """
-    header_display = True
-    for week in range(0,52):
-        for day in [4,5,6]:
-            # Friday, Saturday
-            date = datetime.datetime.strptime('2020 {} {}'.format(week, day), '%Y %U %w')
-            date_str = "2020-{:02}-{:02} 00:00".format(date.month, date.day)
-            print("2020-{:02}-{:02}".format(date.month, date.day), end='')
-            quality_time(
-                date_str,
-                latitude=args.lat,
-                longitude=args.lon,
-                debug=False,
-                moon_display=True,
-                header=header_display
-            )
-            if header_display == True:
-                header_display = False
-    """
-
