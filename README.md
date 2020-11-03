@@ -39,6 +39,45 @@ Quality Imaging Time
   🌌🌌🌌🌌🌌🌌🌌🌌🌌🌌🌌🌌🌘🌘🌞🌞🌞🌞🌞🌞🌞🌞🌞🌞🌞🌞🌞🌞🌞🌞🌞🌞🌞🌞🌞🌞🌞🌞🌞🌞🌞🌌🌌🌌🌌🌌🌌🌌 🌘
 ```
 
+## Virtual environment
+
+A poetry file is provided to install needed packages into a virtual environment
+
+You can install poetry using pip executing the following command
+
+    pip install poetry --user
+
+For more information about poetry you can read the [Poetry documentation site](https://python-poetry.org/docs/)
+
+After installing poetry just run:
+
+    poetry install
+
+This will install the virtual environment and needed modules.
+
+Now to run the script, execute the following command
+
+    poetry run python qitime.py --lat <latitude> --lon <longitude> --date <yyyy-mm-dd>
+
+
+## Development
+
+For developers a [pre-commit](https://pre-commit.com/) configuration is provided so the code is checked and linted properly before committing.
+
+You can install pre-commit using pip executing the following command
+
+    pip install pre-commit --user
+
+Then, to install the git pre-commit hook
+
+    pre-commit install
+
+After that, on each commit the code will be checked previously. To run a check without committing you can execute the following command:
+
+    pre-commit run  --all-files
+
+The pre-commit configuration will automatically format the code using [black](https://black.readthedocs.io/en/stable/) and run several checks.
+
 ## Authors
 
 * Víctor R. Ruiz
@@ -46,6 +85,3 @@ Quality Imaging Time
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
-
-
-

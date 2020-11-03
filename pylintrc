@@ -1,0 +1,55 @@
+[MASTER]
+persistent=no
+
+[MESSAGES CONTROL]
+enable=
+    all,
+    python3,
+
+disable=
+    C0301,
+    C0330,
+    C0326,
+    W1633, W1632,
+    C0114, C0115, C0116,
+    I,
+    bad-continuation,
+    broad-except,
+    dangerous-default-value,
+    duplicate-code,
+    fixme,
+    invalid-name,
+    no-absolute-import,
+    no-self-use,
+    protected-access,
+    raise-missing-from,
+    redefined-builtin,
+    redefined-outer-name,
+    super-init-not-called,
+    superfluous-parens,
+    too-few-public-methods,
+    too-many-arguments,
+    too-many-branches,
+    too-many-instance-attributes,
+    too-many-lines,
+    too-many-locals,
+    too-many-nested-blocks,
+    too-many-public-methods,
+    too-many-return-statements,
+    too-many-statements,
+    trailing-newlines,
+    trailing-whitespace,
+    ungrouped-imports,
+    unused-argument,
+    wrong-import-order,
+    wrong-import-position,
+
+[FORMAT]
+max-line-length = 88
+
+[IMPORTS]
+ignored-modules=
+    ephem
+
+[REPORTS]
+output-format=colorized

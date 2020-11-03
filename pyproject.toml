@@ -1,0 +1,31 @@
+[tool.black]
+line-length = 88
+target-version = ['py36', 'py37', 'py38']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | env
+)/
+'''
+
+[tool.poetry]
+name = "qitime"
+version = "0.1.0"
+description = "Quality imaging time calculator"
+authors = ["Víctor R. Ruiz"]
+
+[tool.poetry.dependencies]
+pyephem = "^3.7.7"
+
+
+[tool.poetry.dev-dependencies]
